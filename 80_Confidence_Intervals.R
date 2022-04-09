@@ -25,7 +25,6 @@ summarise(group= ind, mean=m) %>%
 cmbs <- combn (7,3)
 cmbs 
 
-
 #For that specific selected combination, we find the difference of 9
 ind <- cmbs[,1]
 obs <- mean(the_data$value[ind]) - mean(the_data$value[-ind]) #control and treatment as originally designed
@@ -72,31 +71,30 @@ sum(res >= obs) / length(res)
 #Take aways: This value is very small. In this case, there is not much ambiguity implying that 
 #caffeine increases tapping with this group of 20 students.
 
-
 #We will see the key to this seeming paradox is understanding that differences 
 #must be measured on scales suitable for the data.  
 
-
 ########### Importance of volume of data sampled ############
 ############ How well does a sample statistic (from sample)  estimate an unknown parameter (from population)? ############
-# Intuition should tell us that the sample mean is a better estimate for µ than a single value
-# if we have a large sample
+# Intuition should tell us that the sample mean is a better estimate for µ than 
+# a single value if we have a large sample
 
+library("Hmisc")
 library("UsingR")
+
 diabetes <- subset(Medicare, subset= DRG.Definition =="638 - DIABETES W CC") 
 gap <- with(diabetes, Average.Covered.Charges-Average.Total.Payments) #Difference between covered charges and total payment
 range(gap) #Gap has 128 elements
 plot(gap)
 xbar <- mean(gap)
 
- 
 res <- replicate(2000, { 
   xstar <- sample(gap, length(gap), replace=TRUE) #Choose elements with replacement (repeat elements)
   mean(xstar) - xbar 
   }) #res will have 2000 elements
 plot (res)
 #This is the basic bootstrap confidence interval for µ using the quantile function:
-xbar + quantile(res, c(0.05/2, 1-0.05/2))
+xbar + quantile(res, c(0.025, 0.975))
 
 
 #if certain assumptions on the population that a random sample is drawn from are valid, 
@@ -108,14 +106,23 @@ xbar + quantile(res, c(0.05/2, 1-0.05/2))
 #about 150 calories of energy per day. She wants to know what percent of her college’s 1, 812 students 
 #achieve this level at least 5 times per week. To do so, with the aid of some friends, she finds a random 
 #sample of 125 students of which 80 said they engaged in moderate exercise 5 or more
-#times per week. What is a 90% confidence level for the proportion of all 1, 812 students?
+#times per week. What is a 90% confidence level for the proportion of all 1,812 students?
   
 x = 80
-n =125 # 8 students out of 125 
+n =125 # 80 students out of 125 
 prop.test(x, n)
 
 binom.test(x, n)$conf.int
 confint(binom.test(x, n))
+
+#22695 out of 150000 figure for the year 2021 (15.13%) shows an increase from the year-2020 figure (15%)- Ratio of podemitas in Spain 
+#The null hypothesis is that it is the same as the 15.00% amount of 2020; 
+#the alternative is that the new figure is greater than the old: 
+#H0 : p = 0.1500, HA : p > 0.1500.
+
+prop.test(x=22695, n=150000, p=.1500, alternative="greater")
+#Ho cannot be discarded - Test is not significant
+
 
 ############### Confidence interval for the population mean (normal dist.) ##############
 #A barista at “t-test espresso” has been trained to set the bean grinder so that a 25-second espresso shot 
@@ -125,6 +132,17 @@ confint(binom.test(x, n))
 ozs <- c(1.95, 1.80, 2.10, 1.82, 1.75, 2.01, 1.83, 1.90)
 qqnorm(ozs)
 t.test(ozs, conf.level=0.80)$conf.int
+
+# My Mini is advertised to consume 7.1l. I record my consumption and gets this:
+# Shall I file a claim to BMW becuase the comsuption is higher?
+mini <- c(7.4, 6.1, 8.7, 6.7, 7.0, 7.5, 7.6, 6.9, 6.0, 6.8)
+mean(mini)
+t.test(mini, mu = 7.1, alternative="greater")
+#Ho (consumption is 7.1) cannot be discarded - Test is not significant
+
+#we have also assumed a model for our data (a normal distribution) and that our data 
+#comes from a random sample.
+
 
 ############### One-side confidence interval for the population mean (normal dist.) ##############
 #In R the prop.test, binom.test, and t.test functions can return onesided confidence intervals.
@@ -172,9 +190,6 @@ t.test(x,y, var.equal=FALSE) #Assuming NOT equal variances
 #The difference of 0 is still in the confidence interval, even though the sample means differ quite a bit
 #at first glance (8.846 versus 11.636).
 
-
-
-
 ############### Confidence intervals for differences (dependent means) ###############
 #Two cocktails have been given to same customers.
 #Results are shown below.
@@ -189,3 +204,5 @@ t.test(x-y, conf.level=0.9, var.equal=FALSE)
 #The 90% confidence interval does include 0, indicating a certain confidence 
 #in the two population means do not differ.
 
+
+ 
