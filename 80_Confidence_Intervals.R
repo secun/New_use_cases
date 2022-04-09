@@ -1,17 +1,20 @@
-######### Does the treatment induce a notable effect? ######### 
 ########## Importance of random sampling 
 ######### Exercise 1 - Does honey improve running performance? ######### 
-#The lowest value, the better
+# Does a treatment induce a notable effect? 
+# The lowest value, the better
 library("dplyr") # for pipe operator
 ctrl <- c(23, 33, 40) 
 treatment <- c(19, 22, 25, 26) 
 the_data <- stack(list(ctrl=ctrl, treatment=treatment)) 
-aggregate(values ~ ind, the_data, mean) 
+aggregate(data=the_data, values ~ ind,  mean) 
 
-#A less elegant solution for the same problem
+#A less elegant solution for the same problem vs aggregate
 the_data %>%
 group_by(ind) %>%
-mutate(m=mean(values))
+mutate(m=mean(values)) %>%
+group_by(ind) %>%
+summarise(group= ind, mean=m) %>%
+  unique()
 
 #A difference of 9 suggest that there was an improvement (a difference of 9 over 23-32)
 #The skeptical comes in?
@@ -34,16 +37,16 @@ res
 plot(res) 
 
 sum(res >= obs) / length(res) 
-#In almost 9% of the cases the difference is higher than 9. Is it a significance value?
+#In almost 8.57% of the cases the difference is higher than 9. Is it a significance value?
 
 #Take away: Whether this is a true difference or not is ambiguous, 
 # but what the above illustrates is a process for investigating 
 # differences from random samples.
-
+#Alternative way
 
 #########  Exercise 2 - Does caffeine make you jittery? ######### 
 #We recruit 20 classmates to participate and randomly divides them into two cohorts of size 10. 
-#She serves all a large cup of coffee, but one cohort has decaffeinated and one caffeinated.
+#WE serve all a large cup of coffee, but one cohort has decaffeinated and one caffeinated.
 #The number of finger taps the students made is then secretly counted with the aid of videotape.
 
 caf <- c(245, 246, 246, 248, 248, 248, 250, 250, 250, 252) 
